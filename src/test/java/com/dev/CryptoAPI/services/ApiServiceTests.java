@@ -26,8 +26,10 @@ public class ApiServiceTests {
 
     @Test
     public void test_invalid_id_throws_not_found_exception() throws Exception {
-        assertThrows(CurrencyNotFoundException.class, () -> {
+        CurrencyNotFoundException notFoundException = assertThrows(CurrencyNotFoundException.class, () -> {
             apiService.getCurrencyData(INVALID_CURRENCY);
         });
+
+        assertTrue(notFoundException.getMessage().contains(INVALID_CURRENCY + " was not found!"));
     }
 }
