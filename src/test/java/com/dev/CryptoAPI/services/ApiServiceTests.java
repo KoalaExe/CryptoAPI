@@ -22,6 +22,16 @@ public class ApiServiceTests {
     @Test
     public void test_valid_api_request() throws Exception {
         CurrencyData currencyData = apiService.getCurrencyData(BITCOIN);
+
+        assertNotNull(currencyData.getId());
+        assertNotNull(currencyData.getSymbol());
+        assertNotNull(currencyData.getName());
+        assertNotNull(currencyData.getMarketCap());
+        assertNotNull(currencyData.getGenesisDate());
+        assertNotNull(currencyData.getLastUpdate());
+        assertNotNull(currencyData.getCurrentPrices());
+        assertNotNull(currencyData.getPricePercentageChange());
+        assertNotNull(currencyData.getLastWeekPrice());
     }
 
     @Test
