@@ -64,10 +64,11 @@ public class ApiControllerTests {
 
     @Test
     public void test_caught_other_exception_with_message() throws Exception {
-        when(mockApiService.getCurrencyData(INVALID_CURRENCY)).thenThrow(new Exception(""));
+        when(mockApiService.getCurrencyData(INVALID_CURRENCY)).thenThrow(new Exception("Error"));
 
         ResponseEntity<?> response = apiController.getCoin(INVALID_CURRENCY);
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertEquals("Error", response.getBody());
     }
 }
