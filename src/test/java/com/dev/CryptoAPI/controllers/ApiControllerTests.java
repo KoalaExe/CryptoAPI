@@ -10,6 +10,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Map;
+
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -50,7 +52,8 @@ public class ApiControllerTests {
         ResponseEntity<?> response = apiController.getCoin(INVALID_CURRENCY);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals(INVALID_CURRENCY_EXCEPTION, response.getBody());
+        assertEquals("404", ((Map<String, String>) response.getBody()).get("status"));
+        assertEquals(INVALID_CURRENCY_EXCEPTION, ((Map<String, String>) response.getBody()).get("message"));
     }
 
     @Test
@@ -60,6 +63,7 @@ public class ApiControllerTests {
         ResponseEntity<?> response = apiController.getCoin(INVALID_CURRENCY);
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertEquals("422", ((Map<String, String>) response.getBody()).get("status"));
     }
 
     @Test
@@ -69,6 +73,7 @@ public class ApiControllerTests {
         ResponseEntity<?> response = apiController.getCoin(INVALID_CURRENCY);
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertEquals("Error", response.getBody());
+        assertEquals("422", ((Map<String, String>) response.getBody()).get("status"));
+        assertEquals("Error", ((Map<String, String>) response.getBody()).get("message"));
     }
 }

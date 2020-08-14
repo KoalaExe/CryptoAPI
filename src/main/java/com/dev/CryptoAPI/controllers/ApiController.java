@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 public class ApiController {
 
@@ -28,11 +31,19 @@ public class ApiController {
             CurrencyData currencyData = apiService.getCurrencyData(currencyId);
             response = new ResponseEntity<CurrencyData>(currencyData, HttpStatus.OK);
         } catch (CurrencyNotFoundException e) {
-            response = new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
+            Map<String, String> errorMap = new HashMap<>();
+            errorMap.put("status", "404");
+            errorMap.put("message", e.getMessage());
+
+            response = new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            response = new ResponseEntity<String>(HttpStatus.UNPROCESSABLE_ENTITY);
+            Map<String, String> errorMap = new HashMap<>();
+            errorMap.put("status", "422");
+
+            response = new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.UNPROCESSABLE_ENTITY);
             if(e.getMessage() != null) {
-                response = new ResponseEntity<String>(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+                errorMap.put("message", e.getMessage());
+                response = new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.UNPROCESSABLE_ENTITY);
             }
         }
 
