@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class ApiService {
 
-    private static final String API_BASE_URL = "https://api.coingecko.com/api/v3";
+    private static final String API_BASE_URL = "http://localhost:9999";
     private static final String API_CURRENCY_URI = "/coins/";
     private static final String AUS_DATE_FORMAT = "dd-MM-yyyy";
     private static final DateTimeFormatter AUS_DATE_FORMATTER = DateTimeFormatter.ofPattern(AUS_DATE_FORMAT);
