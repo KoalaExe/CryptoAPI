@@ -2,6 +2,8 @@ package com.dev.CryptoAPI.services;
 
 import com.dev.CryptoAPI.exceptions.CurrencyNotFoundException;
 import com.dev.CryptoAPI.models.CurrencyData;
+import com.dev.CryptoAPI.models.PaginatedCurrencyData;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.ChannelOption;
@@ -35,6 +37,41 @@ public class ApiService {
         requiredCurrencies.add("usd");
         requiredCurrencies.add("jpy");
         requiredCurrencies.add("btc");
+    }
+
+    public List<PaginatedCurrencyData> getPaginatedCurrencyDataList(String currency, int limit, int pageNumber) throws Exception {
+        Map<String, String> symbolMap = new HashMap<>();
+
+        symbolMap.put("usd", "$");
+        symbolMap.put("aud", "$");
+        symbolMap.put("jpy", "¥");
+
+        if(limit < 1 || limit > 10) {
+            throw new Exception("Pagination limit out of range!");
+        }
+
+        if(!currency.equals("usd") && !currency.equals("aud") && !currency.equals("jpy")) {
+            throw new Exception("Invalid currency!");
+        }
+
+        Map<String, String> requestParams = new HashMap<>();
+        requestParams.put("vs_currency", currency);
+        requestParams.put("per_page", Integer.toString(limit));
+        requestParams.put("page", Integer.toString(pageNumber));
+
+        WebClient.RequestHeadersSpec<?> paginatedCurrencyDataURI = createApiRequest("markets", requestParams);
+
+        try {
+            String currencyDataResponse = paginatedCurrencyDataURI
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
+            return processPaginatedData(currencyDataResponse, symbolMap.get(currency));
+        } catch(WebClientException e) {
+            throw new Exception(e.getMessage());
+        }
     }
 
     public CurrencyData getCurrencyData(String currencyId) throws Exception {
@@ -99,6 +136,64 @@ public class ApiService {
                 });
 
         return apiURI;
+    }
+
+    private List<PaginatedCurrencyData> processPaginatedData(String jsonData, String currencySymbol) throws Exception {
+        List<PaginatedCurrencyData> paginatedCurrencyDataList = new ArrayList<>();
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode returnedObjects = mapper.readTree(jsonData);
+
+        for(JsonNode data : returnedObjects) {
+            String currencyId = data.get("id").textValue();
+            PaginatedCurrencyData currencyData = new PaginatedCurrencyData(currencyId);
+
+            currencyData.setCurrentPrice(currencySymbol + Double.toString(data.get("current_price").asDouble()));
+            currencyData.setMarketCap(currencySymbol + Long.toString(data.get("market_cap").asLong()));
+            currencyData.setStatusUpdates(getStatusUpdates(currencyId));
+
+            paginatedCurrencyDataList.add(currencyData);
+        }
+
+        return paginatedCurrencyDataList;
+    }
+
+    private List<Map<String, String>> getStatusUpdates(String currencyId) throws Exception {
+        WebClient.RequestHeadersSpec<?> statusUpdateURI = createApiRequest(currencyId + "/status_updates", new HashMap<>());
+
+        try {
+            String statusUpdateResponse = statusUpdateURI
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
+            return processStatusUpdates(statusUpdateResponse);
+        } catch(WebClientException e) {
+            throw new CurrencyNotFoundException(currencyId + " was not found!");
+        }
+    }
+
+    private List<Map<String, String>> processStatusUpdates(String jsonData) throws Exception {
+        List<Map<String, String>> statusUpdates = new ArrayList<>();
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode responseData = mapper.readTree(jsonData);
+        JsonNode allStatusUpdates = responseData.get("status_updates");
+
+        for(JsonNode currentStatusUpdate : allStatusUpdates) {
+            HashMap<String, String> statusUpdate = new HashMap<>();
+
+            LocalDate createDate = LocalDateTime.ofInstant(Instant.parse(currentStatusUpdate.get("created_at").textValue()), ZoneId.of(ZoneOffset.UTC.getId())).toLocalDate();
+
+            statusUpdate.put("title", currentStatusUpdate.get("user_title").textValue());
+            statusUpdate.put("description", currentStatusUpdate.get("description").textValue());
+            statusUpdate.put("createdAt", AUS_DATE_FORMATTER.format(createDate));
+
+            statusUpdates.add(statusUpdate);
+        }
+
+        return statusUpdates;
     }
 
     private void processCurrencyDataJSON(CurrencyData currencyData, String jsonData) throws Exception {
