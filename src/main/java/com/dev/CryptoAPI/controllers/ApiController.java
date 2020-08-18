@@ -54,7 +54,7 @@ public class ApiController {
         return response;
     }
 
-    @GetMapping("/coins/market")
+    @GetMapping("/coins/markets")
     public ResponseEntity<?> getPaginatedCurrencyData(@RequestParam(name = "vs_currency") String currency, @RequestParam(name = "limit", defaultValue = "10") int limit, @RequestParam(name = "page", defaultValue = "1") int page) {
         ResponseEntity<?> response;
 
