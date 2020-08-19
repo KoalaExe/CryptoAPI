@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class ApiService {
 
-    private static final String API_BASE_URL = "http://localhost:9999/";
+    private static final String API_BASE_URL = "http://localhost:9999";
     private static final String API_CURRENCY_URI = "/coins/";
     private static final String AUS_DATE_FORMAT = "dd-MM-yyyy";
     private static final DateTimeFormatter AUS_DATE_FORMATTER = DateTimeFormatter.ofPattern(AUS_DATE_FORMAT);
@@ -50,8 +50,8 @@ public class ApiService {
             throw new Exception("Pagination limit out of range!");
         }
 
-        if(!currency.equals("usd") && !currency.equals("aud") && !currency.equals("jpy")) {
-            throw new Exception("Invalid currency!");
+        if(!requiredCurrencies.contains(currency) || currency.equals("btc")) {
+            throw new CurrencyNotFoundException("Invalid currency!");
         }
 
         Map<String, String> requestParams = new HashMap<>();

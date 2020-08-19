@@ -61,6 +61,12 @@ public class ApiController {
         try {
             List<PaginatedCurrencyData> paginatedData = apiService.getPaginatedCurrencyDataList(currency, limit, page);
             response = new ResponseEntity<List<PaginatedCurrencyData>>(paginatedData, HttpStatus.OK);
+        } catch(CurrencyNotFoundException e) {
+            Map<String, String> errorMap = new HashMap<>();
+            errorMap.put("status", "404");
+            errorMap.put("message", e.getMessage());
+
+            response = new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             Map<String, String> errorMap = new HashMap<>();
             errorMap.put("status", "422");
