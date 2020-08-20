@@ -12,18 +12,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ApiServiceTests {
 
+    private static final String API_URL = "http://localhost:9999";
     private static final String BITCOIN = "bitcoin";
     private static final String INVALID_CURRENCY = "bitcoi";
     private static final String USD = "usd";
 
     private static final int VALID_LIMIT = 10;
     private static final int INVALID_LIMIT = 15;
+    private static final int PAGE_NUMBER = 1;
 
     private ApiService apiService;
 
     @BeforeEach
     public void init() {
-        apiService = new ApiService();
+        apiService = new ApiService(API_URL);
     }
 
     @Test
@@ -52,7 +54,7 @@ public class ApiServiceTests {
 
     @Test
     public void test_get_paginated_data_with_valid_currency_id_limit_page_api_request() throws Exception {
-        List<PaginatedCurrencyData> paginatedCurrencyDataList = apiService.getPaginatedCurrencyDataList(USD, VALID_LIMIT, 1);
+        List<PaginatedCurrencyData> paginatedCurrencyDataList = apiService.getPaginatedCurrencyDataList(USD, VALID_LIMIT, PAGE_NUMBER);
 
         assertNotNull(paginatedCurrencyDataList);
         assertTrue(paginatedCurrencyDataList.size() <= VALID_LIMIT);
@@ -61,7 +63,7 @@ public class ApiServiceTests {
     @Test
     public void test_get_paginated_data_with_invalid_currency_throws_currency_exception() {
         Exception invalidCurrencyException = assertThrows(Exception.class, () -> {
-            apiService.getPaginatedCurrencyDataList(INVALID_CURRENCY, VALID_LIMIT, 1);
+            apiService.getPaginatedCurrencyDataList(INVALID_CURRENCY, VALID_LIMIT, PAGE_NUMBER);
         });
 
         assertTrue(invalidCurrencyException.getMessage().contains("Invalid currency!"));
@@ -70,7 +72,7 @@ public class ApiServiceTests {
     @Test
     public void test_get_paginated_data_with_invalid_limit_throws_exception() {
         Exception invalidCurrencyException = assertThrows(Exception.class, () -> {
-            apiService.getPaginatedCurrencyDataList(USD, INVALID_LIMIT, 1);
+            apiService.getPaginatedCurrencyDataList(USD, INVALID_LIMIT, PAGE_NUMBER);
         });
 
         assertTrue(invalidCurrencyException.getMessage().contains("Pagination limit out of range!"));

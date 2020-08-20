@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class ApiService {
 
-    private static final String API_BASE_URL = "http://localhost:9999";
+    private final String API_BASE_URL;
     private static final String API_CURRENCY_URI = "/coins/";
     private static final String AUS_DATE_FORMAT = "dd-MM-yyyy";
     private static final DateTimeFormatter AUS_DATE_FORMATTER = DateTimeFormatter.ofPattern(AUS_DATE_FORMAT);
@@ -37,6 +38,10 @@ public class ApiService {
         requiredCurrencies.add("usd");
         requiredCurrencies.add("jpy");
         requiredCurrencies.add("btc");
+    }
+
+    public ApiService(@Value("${external-api.url}") String apiUrl) {
+        API_BASE_URL = apiUrl;
     }
 
     public List<PaginatedCurrencyData> getPaginatedCurrencyDataList(String currency, int limit, int pageNumber) throws Exception {

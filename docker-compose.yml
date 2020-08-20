@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+    wiremock:
+        image: crypto-api-wiremock
+        command: --port 9999
+        ports: 
+            - "9999:9999"
+
+    crypto-api:
+        image: crypto-api
+        ports:
+            - "8080:8080"
