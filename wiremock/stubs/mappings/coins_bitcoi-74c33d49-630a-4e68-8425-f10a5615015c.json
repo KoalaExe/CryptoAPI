@@ -1,0 +1,29 @@
+{
+  "id" : "74c33d49-630a-4e68-8425-f10a5615015c",
+  "name" : "coins_bitcoi",
+  "request" : {
+    "url" : "/coins/bitcoi",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 404,
+    "body" : "{\"error\":\"Could not find coin with the given id\"}",
+    "headers" : {
+      "Date" : "Tue, 18 Aug 2020 11:58:42 GMT",
+      "Content-Type" : "application/json; charset=utf-8",
+      "Set-Cookie" : "__cfduid=d518866640a6cccb0c9f17beb46bbad601597751921; expires=Thu, 17-Sep-20 11:58:41 GMT; path=/; domain=.coingecko.com; HttpOnly; SameSite=Lax",
+      "Vary" : "Accept-Encoding, Origin",
+      "Cache-Control" : "no-cache",
+      "X-Request-Id" : "0ac9dbc8-5dc5-4642-bd44-e9c60226cf77",
+      "X-Runtime" : "0.006047",
+      "CF-Cache-Status" : "EXPIRED",
+      "cf-request-id" : "04a308a36c0000fd4ada0d2200000001",
+      "Expect-CT" : "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
+      "Server" : "cloudflare",
+      "CF-RAY" : "5c4b76e57f2bfd4a-SYD"
+    }
+  },
+  "uuid" : "74c33d49-630a-4e68-8425-f10a5615015c",
+  "persistent" : true,
+  "insertionIndex" : 14
+}

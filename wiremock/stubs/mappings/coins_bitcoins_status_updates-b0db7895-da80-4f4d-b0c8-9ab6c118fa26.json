@@ -1,0 +1,29 @@
+{
+  "id" : "b0db7895-da80-4f4d-b0c8-9ab6c118fa26",
+  "name" : "coins_bitcoins_status_updates",
+  "request" : {
+    "url" : "/coins/bitcoins/status_updates",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 404,
+    "body" : "{\"error\":\"Could not find coin with the given id\"}",
+    "headers" : {
+      "Date" : "Tue, 18 Aug 2020 08:17:34 GMT",
+      "Content-Type" : "application/json; charset=utf-8",
+      "Set-Cookie" : "__cfduid=d9e9de91682917dc07c82889a6b4fe78d1597738653; expires=Thu, 17-Sep-20 08:17:33 GMT; path=/; domain=.coingecko.com; HttpOnly; SameSite=Lax",
+      "Vary" : "Accept-Encoding, Origin",
+      "Cache-Control" : "no-cache",
+      "X-Request-Id" : "12e9fe75-1a86-45b7-a688-f55c927a53f7",
+      "X-Runtime" : "0.006610",
+      "CF-Cache-Status" : "MISS",
+      "cf-request-id" : "04a23e2ff40000fd42df2fe200000001",
+      "Expect-CT" : "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
+      "Server" : "cloudflare",
+      "CF-RAY" : "5c4a32f98fa3fd42-SYD"
+    }
+  },
+  "uuid" : "b0db7895-da80-4f4d-b0c8-9ab6c118fa26",
+  "persistent" : true,
+  "insertionIndex" : 3
+}
