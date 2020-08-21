@@ -56,7 +56,7 @@ public class ApiService {
         }
 
         if(!requiredCurrencies.contains(currency) || currency.equals("btc")) {
-            throw new CurrencyNotFoundException("Invalid currency!");
+            throw new CurrencyNotFoundException("Invalid currency! Use usd, aud or jpy");
         }
 
         Map<String, String> requestParams = new HashMap<>();
@@ -66,17 +66,14 @@ public class ApiService {
 
         WebClient.RequestHeadersSpec<?> paginatedCurrencyDataURI = createApiRequest("markets", requestParams);
 
-        try {
-            String currencyDataResponse = paginatedCurrencyDataURI
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+        String currencyDataResponse = paginatedCurrencyDataURI
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .bodyToMono(String.class)
+            .block();
 
-            return processPaginatedData(currencyDataResponse, symbolMap.get(currency));
-        } catch(WebClientException e) {
-            throw new Exception(e.getMessage());
-        }
+        return processPaginatedData(currencyDataResponse, symbolMap.get(currency));
+
     }
 
     public CurrencyData getCurrencyData(String currencyId) throws Exception {
@@ -202,18 +199,10 @@ public class ApiService {
     }
 
     private void processCurrencyDataJSON(CurrencyData currencyData, String jsonData) throws Exception {
-        if(currencyData == null) {
-            throw new Exception("Currency data is null!");
-        }
-
         ObjectMapper mapper = new ObjectMapper();
         JsonNode parsedObj = mapper.readTree(jsonData);
 
         String currencyId = parsedObj.get("id").textValue();
-
-        if(currencyId == null || !currencyId.equals(currencyData.getId())) {
-            throw new Exception("No currency found!");
-        }
 
         String symbol = parsedObj.get("symbol").textValue();
         String name = parsedObj.get("name").textValue();
@@ -239,18 +228,10 @@ public class ApiService {
     }
 
     private void processLastPriceData(CurrencyData currencyData, String jsonData) throws Exception {
-        if(currencyData == null) {
-            throw new Exception("Currency data is null!");
-        }
-
         ObjectMapper mapper = new ObjectMapper();
         JsonNode parsedObj = mapper.readTree(jsonData);
 
         String currencyId = parsedObj.get("id").textValue();
-
-        if(currencyId == null || !currencyId.equals(currencyData.getId())) {
-            throw new Exception("No currency found!");
-        }
 
         for(String currentCurrency : requiredCurrencies) {
             String lastWeekPrice = Double.toString(parsedObj.get("market_data").get("current_price").get(currentCurrency).asDouble());
