@@ -26,6 +26,16 @@ public class ApiTest
     }
 
     @Test
+    public void test_that_get_currency_header_is_application_json() {
+        get("/coins/" + BITCOIN).then().contentType("application/json");
+    }
+
+    @Test
+    public void that_get_currency_response_time_is_OK() {
+        get("/coins/" + BITCOIN).then().time(lessThan(1000L));
+    }
+
+    @Test
     public void test_that_api_returns_200_and_stubbed_currency_info_data_in_correct_format_for_valid_currency() {
         get("/coins/" + BITCOIN)
             .then()
@@ -81,6 +91,16 @@ public class ApiTest
     }
 
     @Test
+    public void test_that_markets_endpoint_header_is_application_json() {
+        get("/coins/markets?vs_currency=" + USD + "&limit=" + LIMIT + "&page=" + PAGE).then().contentType("application/json");
+    }
+
+    @Test
+    public void that_markets_endpoint_response_time_is_OK() {
+        get("/coins/markets?vs_currency=" + USD + "&limit=" + LIMIT + "&page=" + PAGE).then().time(lessThan(1000L));
+    }
+
+    @Test
     public void test_that_markets_endpoint_returns_200_and_stubbed_data_has_10_items() {
         get("/coins/markets?vs_currency=" + USD + "&limit=" + LIMIT + "&page=" + PAGE)
             .then()
@@ -89,7 +109,18 @@ public class ApiTest
     }
 
     @Test
-    public void test_that_markets_endpoint_returns_200_and_stubbed_data_has_bitcoin_object() {
+    public void test_that_markets_endpoint_returns_200_and_has_correct_bitcoin_object() {
+        get("/coins/markets?vs_currency=" + USD + "&limit=" + LIMIT + "&page=" + PAGE)
+            .then()
+            .assertThat().statusCode(200)
+            .body("[0].id", equalTo("bitcoin"))
+            .body("[0].currentPrice", equalTo("$12259.8"))
+            .body("[0].marketCap", equalTo("$226351166421"))
+            .body("[0].statusUpdates.size()", is(0));
+    }
+
+    @Test
+    public void test_that_markets_endpoint_returns_200_and_stubbed_data_has_correct_crypto_currencies() {
         get("/coins/markets?vs_currency=" + USD + "&limit=" + LIMIT + "&page=" + PAGE)
             .then()
             .assertThat().statusCode(200)
@@ -99,25 +130,25 @@ public class ApiTest
     @Test
     public void test_that_markets_endpoint_returns_200_and_stubbed_data_has_currencies_if_using_default_page_number() {
         get("/coins/markets?vs_currency=" + USD + "&limit=" + LIMIT)
-                .then()
-                .assertThat().statusCode(200)
-                .body("id", hasItems("bitcoin", "ethereum", "bitcoin-cash", "ripple", "tether", "chainlink", "cardano", "litecoin", "bitcoin-cash-sv", "eos"));
+            .then()
+            .assertThat().statusCode(200)
+            .body("id", hasItems("bitcoin", "ethereum", "bitcoin-cash", "ripple", "tether", "chainlink", "cardano", "litecoin", "bitcoin-cash-sv", "eos"));
     }
 
     @Test
     public void test_that_markets_endpoint_returns_200_and_stubbed_data_has_currencies_if_using_default_limit() {
         get("/coins/markets?vs_currency=" + USD + "&page=" + PAGE)
-                .then()
-                .assertThat().statusCode(200)
-                .body("id", hasItems("bitcoin", "ethereum", "bitcoin-cash", "ripple", "tether", "chainlink", "cardano", "litecoin", "bitcoin-cash-sv", "eos"));
+            .then()
+            .assertThat().statusCode(200)
+            .body("id", hasItems("bitcoin", "ethereum", "bitcoin-cash", "ripple", "tether", "chainlink", "cardano", "litecoin", "bitcoin-cash-sv", "eos"));
     }
 
     @Test
     public void test_that_markets_endpoint_returns_200_and_stubbed_data_has_currencies_if_using_default_limit_and_page_number() {
         get("/coins/markets?vs_currency=" + USD)
-                .then()
-                .assertThat().statusCode(200)
-                .body("id", hasItems("bitcoin", "ethereum", "bitcoin-cash", "ripple", "tether", "chainlink", "cardano", "litecoin", "bitcoin-cash-sv", "eos"));
+            .then()
+            .assertThat().statusCode(200)
+            .body("id", hasItems("bitcoin", "ethereum", "bitcoin-cash", "ripple", "tether", "chainlink", "cardano", "litecoin", "bitcoin-cash-sv", "eos"));
     }
 
     @Test
@@ -128,6 +159,5 @@ public class ApiTest
             .statusCode(400);
     }
 
-    @Test
-    public void test_that_
+
 }

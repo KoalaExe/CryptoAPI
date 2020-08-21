@@ -98,6 +98,6 @@ public class ApiServiceTests {
             apiService.getPaginatedCurrencyDataList(USD, VALID_LIMIT, PAGE_NUMBER_TWO);
         });
 
-        assertTrue(invalidCurrencyException.getMessage().contains(" was not found!"));
+        assertTrue(invalidCurrencyException.getMessage().contains(" status updates were not found!"));
     }
 }

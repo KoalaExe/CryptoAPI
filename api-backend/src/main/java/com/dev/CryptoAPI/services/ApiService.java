@@ -172,7 +172,7 @@ public class ApiService {
 
             return processStatusUpdates(statusUpdateResponse);
         } catch(WebClientException e) {
-            throw new CurrencyNotFoundException(currencyId + " was not found!");
+            throw new CurrencyNotFoundException(currencyId + " status updates were not found!");
         }
     }
 
