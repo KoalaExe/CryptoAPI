@@ -1,0 +1,32 @@
+{
+  "id" : "bcd03047-2219-4b90-b0a6-143b02ad32b7",
+  "name" : "coins_ethereum_history",
+  "request" : {
+    "url" : "/coins/ethereum/history?date=17/08/2020",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 400,
+    "body" : "{\"error\":\"invalid date\"}",
+    "headers" : {
+      "Date" : "Fri, 21 Aug 2020 11:23:27 GMT",
+      "Content-Type" : "application/json; charset=utf-8",
+      "Set-Cookie" : "__cfduid=d6133d25b7e5f70f35ff81a8030d28f011598009007; expires=Sun, 20-Sep-20 11:23:27 GMT; path=/; domain=.coingecko.com; HttpOnly; SameSite=Lax",
+      "Vary" : "Accept-Encoding, Origin",
+      "Cache-Control" : "no-cache",
+      "X-Request-Id" : "91e8b470-0b66-4f4a-a437-627d2ed5fcd8",
+      "X-Runtime" : "0.007014",
+      "CF-Cache-Status" : "MISS",
+      "cf-request-id" : "04b25b762f0000fd2e6c1c0200000001",
+      "Expect-CT" : "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
+      "Server" : "cloudflare",
+      "CF-RAY" : "5c63fb69ebe4fd2e-SYD"
+    }
+  },
+  "uuid" : "bcd03047-2219-4b90-b0a6-143b02ad32b7",
+  "persistent" : true,
+  "scenarioName" : "scenario-1-coins-ethereum-history",
+  "requiredScenarioState" : "Started",
+  "newScenarioState" : "scenario-1-coins-ethereum-history-2",
+  "insertionIndex" : 21
+}

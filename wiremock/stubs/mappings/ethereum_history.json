@@ -1,0 +1,15 @@
+{
+    "request": {
+        "method": "GET",
+        "urlPath": "/coins/ethereum/history",
+        "queryParameters": {
+            "date": {
+                "matches": "^[0-9]{2}-[0-9]{2}-[0-9]{4}$"
+            }
+        }
+    },
+    "response": {
+        "status": 200,
+        "bodyFileName": "ethereum_history.json"
+    }
+}
