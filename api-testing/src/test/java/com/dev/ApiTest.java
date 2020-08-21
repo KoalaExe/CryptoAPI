@@ -11,7 +11,7 @@ import static io.restassured.RestAssured.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.Matchers.*;
 
-public class AppTest
+public class ApiTest
 {
     private static final String BASE_URI = "http://localhost:8080";
     private static final String BITCOIN = "bitcoin";
@@ -127,4 +127,7 @@ public class AppTest
             .assertThat()
             .statusCode(400);
     }
+
+    @Test
+    public void test_that_
 }

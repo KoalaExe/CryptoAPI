@@ -40,7 +40,7 @@ public class ApiService {
         requiredCurrencies.add("btc");
     }
 
-    public ApiService(@Value("${external-api.url}") String apiUrl) {
+    public ApiService(@Value("${external-api.test.url}") String apiUrl) {
         API_BASE_URL = apiUrl;
     }
 
