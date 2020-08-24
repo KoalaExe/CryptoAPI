@@ -3,7 +3,6 @@ package com.dev.CryptoAPI.services;
 import com.dev.CryptoAPI.exceptions.CurrencyNotFoundException;
 import com.dev.CryptoAPI.models.CurrencyData;
 import com.dev.CryptoAPI.models.PaginatedCurrencyData;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.ChannelOption;
@@ -163,17 +162,13 @@ public class ApiService {
     private List<Map<String, String>> getStatusUpdates(String currencyId) throws Exception {
         WebClient.RequestHeadersSpec<?> statusUpdateURI = createApiRequest(currencyId + "/status_updates", new HashMap<>());
 
-        try {
-            String statusUpdateResponse = statusUpdateURI
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+        String statusUpdateResponse = statusUpdateURI
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .bodyToMono(String.class)
+            .block();
 
-            return processStatusUpdates(statusUpdateResponse);
-        } catch(WebClientException e) {
-            throw new CurrencyNotFoundException(currencyId + " status updates were not found!");
-        }
+        return processStatusUpdates(statusUpdateResponse);
     }
 
     private List<Map<String, String>> processStatusUpdates(String jsonData) throws Exception {

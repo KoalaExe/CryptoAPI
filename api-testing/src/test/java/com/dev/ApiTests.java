@@ -1,17 +1,12 @@
 package com.dev;
 
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
 
-import java.util.List;
-
 import static io.restassured.RestAssured.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.Matchers.*;
 
-public class ApiTest
+public class ApiTests
 {
     private static final String BASE_URI = "http://localhost:8080";
     private static final String BITCOIN = "bitcoin";
@@ -21,7 +16,7 @@ public class ApiTest
     private static final String PAGE = "1";
 
     @BeforeAll
-    public void init() {
+    public static void init() {
         baseURI = BASE_URI;
     }
 
