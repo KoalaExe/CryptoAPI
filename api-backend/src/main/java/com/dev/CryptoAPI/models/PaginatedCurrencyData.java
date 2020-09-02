@@ -10,17 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
+@Getter
+@Setter
 public class PaginatedCurrencyData {
 
-    @NonNull @Getter @Setter
+    @NonNull
     private String id;
-
-    @Getter @Setter
     private String currentPrice;
-
-    @Getter @Setter
     private String marketCap;
-
-    @Getter @Setter
     private List<Map<String, String>> statusUpdates = new ArrayList<>();
 }

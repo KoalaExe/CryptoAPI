@@ -1,14 +1,24 @@
 package com.dev.CryptoAPI.services;
 
+import com.dev.CryptoAPI.clients.CryptoClient;
+import com.dev.CryptoAPI.dto.CurrencyDataDTO;
+import com.dev.CryptoAPI.dto.CurrencyHistoryDTO;
 import com.dev.CryptoAPI.exceptions.CurrencyNotFoundException;
 import com.dev.CryptoAPI.models.CurrencyData;
 import com.dev.CryptoAPI.models.PaginatedCurrencyData;
+import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApiServiceTests {
@@ -23,42 +33,101 @@ public class ApiServiceTests {
     private static final int PAGE_NUMBER_ONE = 1;
     private static final int PAGE_NUMBER_TWO = 2;
 
+    @Mock
+    private CryptoClient mockCryptoClient;
+
     private ApiService apiService;
 
     @BeforeEach
     public void init() {
-        apiService = new ApiService(API_URL);
+        MockitoAnnotations.initMocks(this);
+        apiService = new ApiService(API_URL, mockCryptoClient);
     }
 
     @Test
     public void test_get_currency_data_with_valid_currency() throws Exception {
+        CurrencyDataDTO currencyDataDTO = new CurrencyDataDTO();
+
+        LocalDate lastWeek = LocalDate.now().minusWeeks(1);
+        String lastWeekString = DateTimeFormatter.ofPattern("dd-MM-yyyy").format(lastWeek);
+
+        currencyDataDTO.setId("bitcoin");
+        currencyDataDTO.setSymbol("btc");
+        currencyDataDTO.setName("Bitcoin");
+        currencyDataDTO.setGenesis_date("2009-01-03");
+        currencyDataDTO.setLast_updated("2020-09-02T01:24:18.219Z");
+
+        Map<String, Map<String, ? extends Number>> market_data = new HashMap<>();
+
+        Map<String, Long> marketCaps = new HashMap<>();
+        marketCaps.put("usd", 219549868922L);
+
+        market_data.put("market_cap", marketCaps);
+
+        Map<String, Double> currentPrices = new HashMap<>();
+        currentPrices.put("aud", 16175.85D);
+        currentPrices.put("usd", 11898.14D);
+        currentPrices.put("jpy", 1261834D);
+        currentPrices.put("btc", 1.0D);
+
+        market_data.put("current_price", currentPrices);
+
+        Map<String, Double> priceChanges = new HashMap<>();
+        priceChanges.put("aud", 2.73808D);
+        priceChanges.put("usd", 2.40044D);
+        priceChanges.put("jpy", 2.65895D);
+        priceChanges.put("btc", 0.0D);
+
+        market_data.put("price_change_percentage_24h_in_currency", priceChanges);
+
+        currencyDataDTO.setMarket_data(market_data);
+
+        CurrencyHistoryDTO currencyHistoryDTO = new CurrencyHistoryDTO();
+
+        Map<String, Map<String, ? extends Number>> historicMarketData = new HashMap<>();
+
+        Map<String, Double> historicCurrentPrices = new HashMap<>();
+        historicCurrentPrices.put("aud", 15757.388389597621D);
+        historicCurrentPrices.put("usd", 11350.753473213D);
+        historicCurrentPrices.put("jpy", 1207339.9193085101D);
+        historicCurrentPrices.put("btc", 1.0D);
+
+        historicMarketData.put("current_price", historicCurrentPrices);
+
+        currencyHistoryDTO.setMarket_data(historicMarketData);
+
+        when(mockCryptoClient.getCurrencyData(BITCOIN)).thenReturn(currencyDataDTO);
+        when(mockCryptoClient.getCurrencyHistory(BITCOIN, lastWeekString)).thenReturn(currencyHistoryDTO);
+
         CurrencyData currencyData = apiService.getCurrencyData(BITCOIN);
 
-        assertNotNull(currencyData.getId());
-        assertNotNull(currencyData.getSymbol());
-        assertNotNull(currencyData.getName());
-        assertNotNull(currencyData.getMarketCap());
-        assertNotNull(currencyData.getGenesisDate());
-        assertNotNull(currencyData.getLastUpdate());
+        assertEquals(BITCOIN, currencyData.getId());
+        assertEquals("btc", currencyData.getSymbol());
+        assertEquals("Bitcoin", currencyData.getName());
+        assertEquals("219549868922", currencyData.getMarketCap());
+        assertEquals("03-01-2009", currencyData.getGenesisDate());
+        assertEquals("02-09-2020", currencyData.getLastUpdate());
 
-        assertNotNull(currencyData.getCurrentPrices().get("aud"));
-        assertNotNull(currencyData.getCurrentPrices().get("usd"));
-        assertNotNull(currencyData.getCurrentPrices().get("jpy"));
-        assertNotNull(currencyData.getCurrentPrices().get("btc"));
+        assertEquals("16175.85", currencyData.getCurrentPrices().get("aud"));
+        assertEquals("11898.14", currencyData.getCurrentPrices().get("usd"));
+        assertEquals("1261834.0", currencyData.getCurrentPrices().get("jpy"));
+        assertEquals("1.0", currencyData.getCurrentPrices().get("btc"));
 
-        assertNotNull(currencyData.getPricePercentageChange().get("aud"));
-        assertNotNull(currencyData.getPricePercentageChange().get("usd"));
-        assertNotNull(currencyData.getPricePercentageChange().get("jpy"));
-        assertNotNull(currencyData.getPricePercentageChange().get("btc"));
+        assertEquals("2.73808", currencyData.getPricePercentageChange().get("aud"));
+        assertEquals("2.40044", currencyData.getPricePercentageChange().get("usd"));
+        assertEquals("2.65895", currencyData.getPricePercentageChange().get("jpy"));
+        assertEquals("0.0", currencyData.getPricePercentageChange().get("btc"));
 
-        assertNotNull(currencyData.getLastWeekPrice().get("aud"));
-        assertNotNull(currencyData.getLastWeekPrice().get("usd"));
-        assertNotNull(currencyData.getLastWeekPrice().get("jpy"));
-        assertNotNull(currencyData.getLastWeekPrice().get("btc"));
+        assertEquals("15757.388389597621", currencyData.getLastWeekPrice().get("aud"));
+        assertEquals("11350.753473213", currencyData.getLastWeekPrice().get("usd"));
+        assertEquals("1207339.9193085101", currencyData.getLastWeekPrice().get("jpy"));
+        assertEquals("1.0", currencyData.getLastWeekPrice().get("btc"));
     }
 
     @Test
     public void test_get_currency_data_with_invalid_currency_id_throws_currency_not_found_exception() throws Exception {
+        when(mockCryptoClient.getCurrencyData(INVALID_CURRENCY)).thenThrow(FeignException.class);
+
         CurrencyNotFoundException notFoundException = assertThrows(CurrencyNotFoundException.class, () -> {
             apiService.getCurrencyData(INVALID_CURRENCY);
         });

@@ -1,10 +1,14 @@
 package com.dev.CryptoAPI.services;
 
+import com.dev.CryptoAPI.clients.CryptoClient;
 import com.dev.CryptoAPI.exceptions.CurrencyNotFoundException;
 import com.dev.CryptoAPI.models.CurrencyData;
+import com.dev.CryptoAPI.dto.CurrencyDataDTO;
+import com.dev.CryptoAPI.dto.CurrencyHistoryDTO;
 import com.dev.CryptoAPI.models.PaginatedCurrencyData;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
@@ -13,7 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.util.UriBuilder;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.tcp.TcpClient;
@@ -27,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class ApiService {
 
     private final String API_BASE_URL;
+    private final CryptoClient cryptoClient;
     private static final String API_CURRENCY_URI = "/coins/";
     private static final String AUS_DATE_FORMAT = "dd-MM-yyyy";
     private static final DateTimeFormatter AUS_DATE_FORMATTER = DateTimeFormatter.ofPattern(AUS_DATE_FORMAT);
@@ -39,8 +43,9 @@ public class ApiService {
         requiredCurrencies.add("btc");
     }
 
-    public ApiService(@Value("${external-api.url}") String apiUrl) {
+    public ApiService(@Value("${external-api.url}") String apiUrl, CryptoClient cryptoClient) {
         API_BASE_URL = apiUrl;
+        this.cryptoClient = cryptoClient;
     }
 
     public List<PaginatedCurrencyData> getPaginatedCurrencyDataList(String currency, int limit, int pageNumber) throws Exception {
@@ -81,28 +86,26 @@ public class ApiService {
         LocalDate lastWeek = LocalDate.now().minusWeeks(1);
         String lastWeekString = AUS_DATE_FORMATTER.format(lastWeek);
 
-        Map<String, String> lastPriceParams = new HashMap<>();
-        lastPriceParams.put("date", lastWeekString);
-
-        WebClient.RequestHeadersSpec<?> currencyDataURI = createApiRequest(currencyId, new HashMap<>());
-        WebClient.RequestHeadersSpec<?> lastPriceURI = createApiRequest(currencyId + "/history", lastPriceParams);
-
         try {
-            String currencyDataResponse = currencyDataURI
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+            CurrencyDataDTO currencyDataDTO = cryptoClient.getCurrencyData(currencyId);
+            CurrencyHistoryDTO currencyHistoryDTO = cryptoClient.getCurrencyHistory(currencyId, lastWeekString);
 
-            String lastPriceResponse = lastPriceURI
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+            currencyData.setSymbol(currencyDataDTO.getSymbol());
+            currencyData.setName(currencyDataDTO.getName());
+            currencyData.setMarketCap(Long.toString(((Map<String, Long>)currencyDataDTO.getMarket_data().get("market_cap")).get("usd")));
 
-            processCurrencyDataJSON(currencyData, currencyDataResponse);
-            processLastPriceData(currencyData, lastPriceResponse);
-        } catch(WebClientException e) {
+            LocalDate genesisDate = LocalDate.parse(currencyDataDTO.getGenesis_date());
+            currencyData.setGenesisDate(AUS_DATE_FORMATTER.format(genesisDate));
+
+            LocalDate lastUpdate = LocalDateTime.ofInstant(Instant.parse(currencyDataDTO.getLast_updated()), ZoneId.of(ZoneOffset.UTC.getId())).toLocalDate();
+            currencyData.setLastUpdate(AUS_DATE_FORMATTER.format(lastUpdate));
+
+            for(String currentCurrency : requiredCurrencies) {
+                currencyData.getCurrentPrices().put(currentCurrency, Double.toString(((Map<String, Number>)currencyDataDTO.getMarket_data().get("current_price")).get(currentCurrency).doubleValue()));
+                currencyData.getPricePercentageChange().put(currentCurrency, Double.toString(((Map<String, Number>)currencyDataDTO.getMarket_data().get("price_change_percentage_24h_in_currency")).get(currentCurrency).doubleValue()));
+                currencyData.getLastWeekPrice().put(currentCurrency, Double.toString(currencyHistoryDTO.getMarket_data().get("current_price").get(currentCurrency).doubleValue()));
+            }
+        } catch(FeignException e) {
             throw new CurrencyNotFoundException(currencyId + " was not found!");
         }
 
