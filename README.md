@@ -8,7 +8,7 @@ This repository comes with both a live data build and an API testing build which
 1. Make sure you are in the root directory and the current branch is ```dev```
 2. Run ```cd api-backend``` and then ```mvn clean install``` to build the target ```jar``` file
 3. Return to the root directory and then run ```docker-compose up --build -d``` to build the images and run the API on ```http://localhost:8080```
-4. Stop the API by running ```http://docker-compose down```
+4. Stop the API by running ```docker-compose down```
 
 ##### API Endpoints
 1. ```/coins/{currencyID}```, where currencyID is id of a valid cryptocurrency
