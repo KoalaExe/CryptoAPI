@@ -3,6 +3,8 @@ package com.dev.CryptoAPI.services;
 import com.dev.CryptoAPI.clients.CryptoClient;
 import com.dev.CryptoAPI.dto.CurrencyDataDTO;
 import com.dev.CryptoAPI.dto.CurrencyHistoryDTO;
+import com.dev.CryptoAPI.dto.CurrencyMarketDTO;
+import com.dev.CryptoAPI.dto.StatusUpdateDTO;
 import com.dev.CryptoAPI.exceptions.CurrencyNotFoundException;
 import com.dev.CryptoAPI.models.CurrencyData;
 import com.dev.CryptoAPI.models.PaginatedCurrencyData;
@@ -14,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ApiServiceTests {
 
-    private static final String API_URL = "https://api.coingecko.com/api/v3";
     private static final String BITCOIN = "bitcoin";
     private static final String INVALID_CURRENCY = "bitcoi";
     private static final String USD = "usd";
@@ -31,7 +33,6 @@ public class ApiServiceTests {
     private static final int VALID_LIMIT = 10;
     private static final int INVALID_LIMIT = 15;
     private static final int PAGE_NUMBER_ONE = 1;
-    private static final int PAGE_NUMBER_TWO = 2;
 
     @Mock
     private CryptoClient mockCryptoClient;
@@ -41,7 +42,7 @@ public class ApiServiceTests {
     @BeforeEach
     public void init() {
         MockitoAnnotations.initMocks(this);
-        apiService = new ApiService(API_URL, mockCryptoClient);
+        apiService = new ApiService(mockCryptoClient);
     }
 
     @Test
@@ -137,10 +138,73 @@ public class ApiServiceTests {
 
     @Test
     public void test_get_paginated_data_with_valid_currency_id_limit_page_api_request() throws Exception {
+        String USER_TITLE = "Operations Director";
+        String DESCRIPTION_ONE = "For all you Atari flashback fans out there, get ready to use Litecoin for everything from games to hotels. Today we announce our newest partnership with Atari! Litecoin will also become an option for purchasing the much-anticipated new Atari VCS gaming console at a discount! \r\n\r\nFor more info see our blog: litecoin-foundation.org/atari/";
+        String DESCRIPTION_TWO = "Litecoin Foundation Partners With MeconCash, Enabling Fiat Withdrawal At Over 13,000 ATMs Across South Korea.\r\n\r\n👇 Read More\r\nhttps://litecoin-foundation.org/litecoin-foundation-partners-with-meconcash-enabling-fiat-withdrawal-at-over-13000-atms-across-south-korea/";
+        String CREATED_DATE_ONE = "2020-05-21T12:15:08.418Z";
+        String CREATED_DATE_TWO = "2020-03-02T13:08:21.379Z";
+
+        List<CurrencyMarketDTO> data = new ArrayList<>();
+        StatusUpdateDTO bitcoinStatusUpdateDTO = new StatusUpdateDTO();
+        StatusUpdateDTO litecoinStatusUpdateDTO = new StatusUpdateDTO();
+
+        CurrencyMarketDTO btcData = new CurrencyMarketDTO();
+        btcData.setId("bitcoin");
+        btcData.setCurrent_price(11753.6D);
+        btcData.setMarket_cap(217332541768L);
+
+        data.add(btcData);
+
+        CurrencyMarketDTO liteData = new CurrencyMarketDTO();
+        liteData.setId("litecoin");
+        liteData.setCurrent_price(62.23D);
+        liteData.setMarket_cap(4066289130L);
+
+        data.add(liteData);
+
+        when(mockCryptoClient.getCurrencyMarketData("usd", "10", "1")).thenReturn(data);
+
+        bitcoinStatusUpdateDTO.setStatus_updates(new ArrayList<>());
+        when(mockCryptoClient.getStatusUpdates("bitcoin")).thenReturn(bitcoinStatusUpdateDTO);
+
+        List<Map<String, Object>> litecoinStatusUpdates = new ArrayList<>();
+        Map<String, Object> statusUpdateOne = new HashMap<>();
+        statusUpdateOne.put("user_title", USER_TITLE);
+        statusUpdateOne.put("description", DESCRIPTION_ONE);
+        statusUpdateOne.put("created_at", CREATED_DATE_ONE);
+        litecoinStatusUpdates.add(statusUpdateOne);
+
+        Map<String, Object> statusUpdateTwo = new HashMap<>();
+        statusUpdateTwo.put("user_title", USER_TITLE);
+        statusUpdateTwo.put("description", DESCRIPTION_TWO);
+        statusUpdateTwo.put("created_at", CREATED_DATE_TWO);
+        litecoinStatusUpdates.add(statusUpdateTwo);
+
+        litecoinStatusUpdateDTO.setStatus_updates(litecoinStatusUpdates);
+
+        when(mockCryptoClient.getStatusUpdates("litecoin")).thenReturn(litecoinStatusUpdateDTO);
+
         List<PaginatedCurrencyData> paginatedCurrencyDataList = apiService.getPaginatedCurrencyDataList(USD, VALID_LIMIT, PAGE_NUMBER_ONE);
 
-        assertNotNull(paginatedCurrencyDataList);
-        assertTrue(paginatedCurrencyDataList.size() <= VALID_LIMIT);
+        assertEquals(2, paginatedCurrencyDataList.size());
+
+        assertEquals("bitcoin", paginatedCurrencyDataList.get(0).getId());
+        assertEquals("$11753.6", paginatedCurrencyDataList.get(0).getCurrentPrice());
+        assertEquals("$217332541768", paginatedCurrencyDataList.get(0).getMarketCap());
+        assertEquals(0, paginatedCurrencyDataList.get(0).getStatusUpdates().size());
+
+        assertEquals("litecoin", paginatedCurrencyDataList.get(1).getId());
+        assertEquals("$62.23", paginatedCurrencyDataList.get(1).getCurrentPrice());
+        assertEquals("$4066289130", paginatedCurrencyDataList.get(1).getMarketCap());
+        assertEquals(2, paginatedCurrencyDataList.get(1).getStatusUpdates().size());
+
+        assertEquals(USER_TITLE, paginatedCurrencyDataList.get(1).getStatusUpdates().get(0).get("title"));
+        assertEquals(DESCRIPTION_ONE, paginatedCurrencyDataList.get(1).getStatusUpdates().get(0).get("description"));
+        assertEquals("21-05-2020", paginatedCurrencyDataList.get(1).getStatusUpdates().get(0).get("createdAt"));
+
+        assertEquals(USER_TITLE, paginatedCurrencyDataList.get(1).getStatusUpdates().get(1).get("title"));
+        assertEquals(DESCRIPTION_TWO, paginatedCurrencyDataList.get(1).getStatusUpdates().get(1).get("description"));
+        assertEquals("02-03-2020", paginatedCurrencyDataList.get(1).getStatusUpdates().get(1).get("createdAt"));
     }
 
     @Test
