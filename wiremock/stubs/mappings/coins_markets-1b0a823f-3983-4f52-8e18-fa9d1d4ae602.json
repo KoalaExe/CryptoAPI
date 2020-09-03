@@ -2,8 +2,19 @@
   "id" : "1b0a823f-3983-4f52-8e18-fa9d1d4ae602",
   "name" : "coins_markets",
   "request" : {
-    "url" : "/coins/markets?per_page=10&vs_currency=usd&page=2",
-    "method" : "GET"
+    "method" : "GET",
+    "urlPath" : "/coins/markets",
+    "queryParameters": {
+        "vs_currency": {
+            "matches": "usd"
+        },
+        "per_page": {
+            "matches": "10"
+        },
+        "page": {
+            "matches": "2"
+        }
+    }
   },
   "response" : {
     "status" : 200,
