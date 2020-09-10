@@ -1,13 +1,12 @@
 package com.dev.CryptoAPI.services;
 
 import com.dev.CryptoAPI.clients.CryptoClient;
-import com.dev.CryptoAPI.dto.CurrencyMarketDTO;
-import com.dev.CryptoAPI.dto.StatusUpdateDTO;
+import com.dev.CryptoAPI.dto.*;
 import com.dev.CryptoAPI.exceptions.CurrencyNotFoundException;
 import com.dev.CryptoAPI.models.CurrencyData;
-import com.dev.CryptoAPI.dto.CurrencyDataDTO;
-import com.dev.CryptoAPI.dto.CurrencyHistoryDTO;
+import com.dev.CryptoAPI.models.MarketCap;
 import com.dev.CryptoAPI.models.PaginatedCurrencyData;
+import com.dev.CryptoAPI.models.StatusUpdate;
 import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,16 +63,16 @@ public class ApiService {
             paginatedCurrencyData.setMarketCap(currencySymbol + Long.toString(marketCap));
 
             StatusUpdateDTO statusUpdateDTO = cryptoClient.getStatusUpdates(currencyId);
-            List<Map<String, String>> statusUpdates = new ArrayList<>();
+            List<StatusUpdate> statusUpdates = new ArrayList<>();
 
-            for(Map<String, Object> currentStatusUpdate : statusUpdateDTO.getStatus_updates()) {
-                Map<String, String> statusUpdate = new HashMap<>();
+            for(StatusUpdateDataDTO currentStatusUpdate : statusUpdateDTO.getStatus_updates()) {
+                LocalDate createDate = LocalDateTime.ofInstant(Instant.parse(currentStatusUpdate.getCreated_at()), ZoneId.of(ZoneOffset.UTC.getId())).toLocalDate();
 
-                LocalDate createDate = LocalDateTime.ofInstant(Instant.parse((String)currentStatusUpdate.get("created_at")), ZoneId.of(ZoneOffset.UTC.getId())).toLocalDate();
-
-                statusUpdate.put("title", (String)currentStatusUpdate.get("user_title"));
-                statusUpdate.put("description", (String)currentStatusUpdate.get("description"));
-                statusUpdate.put("createdAt", AUS_DATE_FORMATTER.format(createDate));
+                StatusUpdate statusUpdate = StatusUpdate.builder()
+                        .title(currentStatusUpdate.getUser_title())
+                        .description(currentStatusUpdate.getDescription())
+                        .createdAt(AUS_DATE_FORMATTER.format(createDate))
+                        .build();
 
                 statusUpdates.add(statusUpdate);
             }
@@ -99,7 +98,11 @@ public class ApiService {
             currencyData.setId(currencyDataDTO.getId());
             currencyData.setSymbol(currencyDataDTO.getSymbol());
             currencyData.setName(currencyDataDTO.getName());
-            currencyData.setMarketCap(Long.toString(((Map<String, Long>)currencyDataDTO.getMarket_data().get("market_cap")).get("usd")));
+            currencyData.setMarketCap(MarketCap.builder()
+                    .aud(Long.toString(currencyDataDTO.getMarket_data().getMarket_cap().getAud()))
+                    .usd(Long.toString(currencyDataDTO.getMarket_data().getMarket_cap().getUsd()))
+                    .jpy(Long.toString(currencyDataDTO.getMarket_data().getMarket_cap().getJpy()))
+                    .build());
 
             LocalDate genesisDate = LocalDate.parse(currencyDataDTO.getGenesis_date());
             currencyData.setGenesisDate(AUS_DATE_FORMATTER.format(genesisDate));
@@ -108,9 +111,9 @@ public class ApiService {
             currencyData.setLastUpdate(AUS_DATE_FORMATTER.format(lastUpdate));
 
             for(String currentCurrency : requiredCurrencies) {
-                currencyData.getCurrentPrices().put(currentCurrency, Double.toString(((Map<String, Number>)currencyDataDTO.getMarket_data().get("current_price")).get(currentCurrency).doubleValue()));
-                currencyData.getPricePercentageChange().put(currentCurrency, Double.toString(((Map<String, Number>)currencyDataDTO.getMarket_data().get("price_change_percentage_24h_in_currency")).get(currentCurrency).doubleValue()));
-                currencyData.getLastWeekPrice().put(currentCurrency, Double.toString(currencyHistoryDTO.getMarket_data().get("current_price").get(currentCurrency).doubleValue()));
+                currencyData.getCurrentPrices().put(currentCurrency, Double.toString(currencyDataDTO.getMarket_data().getCurrent_price().getValue(currentCurrency).doubleValue()));
+                currencyData.getPricePercentageChange().put(currentCurrency, Double.toString(currencyDataDTO.getMarket_data().getPrice_change_percentage_24h_in_currency().getValue(currentCurrency).doubleValue()));
+                currencyData.getLastWeekPrice().put(currentCurrency, Double.toString(currencyHistoryDTO.getMarket_data().getCurrent_price().getValue(currentCurrency).doubleValue()));
             }
         } catch(FeignException e) {
             throw new CurrencyNotFoundException(currencyId + " was not found!");

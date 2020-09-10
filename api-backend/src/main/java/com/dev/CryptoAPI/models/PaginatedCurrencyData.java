@@ -18,5 +18,5 @@ public class PaginatedCurrencyData {
     private String id;
     private String currentPrice;
     private String marketCap;
-    private List<Map<String, String>> statusUpdates = new ArrayList<>();
+    private List<StatusUpdate> statusUpdates = new ArrayList<>();
 }

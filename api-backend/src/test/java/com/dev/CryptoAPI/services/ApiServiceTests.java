@@ -1,10 +1,7 @@
 package com.dev.CryptoAPI.services;
 
 import com.dev.CryptoAPI.clients.CryptoClient;
-import com.dev.CryptoAPI.dto.CurrencyDataDTO;
-import com.dev.CryptoAPI.dto.CurrencyHistoryDTO;
-import com.dev.CryptoAPI.dto.CurrencyMarketDTO;
-import com.dev.CryptoAPI.dto.StatusUpdateDTO;
+import com.dev.CryptoAPI.dto.*;
 import com.dev.CryptoAPI.exceptions.CurrencyNotFoundException;
 import com.dev.CryptoAPI.models.CurrencyData;
 import com.dev.CryptoAPI.models.PaginatedCurrencyData;
@@ -58,42 +55,46 @@ public class ApiServiceTests {
         currencyDataDTO.setGenesis_date("2009-01-03");
         currencyDataDTO.setLast_updated("2020-09-02T01:24:18.219Z");
 
-        Map<String, Map<String, ? extends Number>> market_data = new HashMap<>();
+        MarketCapDTO marketCaps = MarketCapDTO.builder()
+            .aud(263400757996L)
+            .usd(219549868922L)
+            .jpy(20328521506238L)
+            .build();
 
-        Map<String, Long> marketCaps = new HashMap<>();
-        marketCaps.put("usd", 219549868922L);
+        CurrencyValueDTO currentPrices = CurrencyValueDTO.builder()
+            .aud(16175.85D)
+            .usd(11898.14D)
+            .jpy(1261834D)
+            .btc(1.0D)
+            .build();
 
-        market_data.put("market_cap", marketCaps);
+        CurrencyValueDTO priceChanges = CurrencyValueDTO.builder()
+            .aud(2.73808D)
+            .usd(2.40044D)
+            .jpy(2.65895D)
+            .btc(0.0D)
+            .build();
 
-        Map<String, Double> currentPrices = new HashMap<>();
-        currentPrices.put("aud", 16175.85D);
-        currentPrices.put("usd", 11898.14D);
-        currentPrices.put("jpy", 1261834D);
-        currentPrices.put("btc", 1.0D);
-
-        market_data.put("current_price", currentPrices);
-
-        Map<String, Double> priceChanges = new HashMap<>();
-        priceChanges.put("aud", 2.73808D);
-        priceChanges.put("usd", 2.40044D);
-        priceChanges.put("jpy", 2.65895D);
-        priceChanges.put("btc", 0.0D);
-
-        market_data.put("price_change_percentage_24h_in_currency", priceChanges);
+        MarketDataDTO market_data = MarketDataDTO.builder()
+            .market_cap(marketCaps)
+            .current_price(currentPrices)
+            .price_change_percentage_24h_in_currency(priceChanges)
+            .build();
 
         currencyDataDTO.setMarket_data(market_data);
 
         CurrencyHistoryDTO currencyHistoryDTO = new CurrencyHistoryDTO();
 
-        Map<String, Map<String, ? extends Number>> historicMarketData = new HashMap<>();
+        CurrencyValueDTO historicCurrentPrices = CurrencyValueDTO.builder()
+            .aud(15757.388389597621D)
+            .usd(11350.753473213D)
+            .jpy(1207339.9193085101D)
+            .btc(1.0D)
+            .build();
 
-        Map<String, Double> historicCurrentPrices = new HashMap<>();
-        historicCurrentPrices.put("aud", 15757.388389597621D);
-        historicCurrentPrices.put("usd", 11350.753473213D);
-        historicCurrentPrices.put("jpy", 1207339.9193085101D);
-        historicCurrentPrices.put("btc", 1.0D);
-
-        historicMarketData.put("current_price", historicCurrentPrices);
+        HistoryMarketDataDTO historicMarketData = HistoryMarketDataDTO.builder()
+                .current_price(historicCurrentPrices)
+                .build();
 
         currencyHistoryDTO.setMarket_data(historicMarketData);
 
@@ -105,7 +106,9 @@ public class ApiServiceTests {
         assertEquals(BITCOIN, currencyData.getId());
         assertEquals("btc", currencyData.getSymbol());
         assertEquals("Bitcoin", currencyData.getName());
-        assertEquals("219549868922", currencyData.getMarketCap());
+        assertEquals("263400757996", currencyData.getMarketCap().getAud());
+        assertEquals("219549868922", currencyData.getMarketCap().getUsd());
+        assertEquals("20328521506238", currencyData.getMarketCap().getJpy());
         assertEquals("03-01-2009", currencyData.getGenesisDate());
         assertEquals("02-09-2020", currencyData.getLastUpdate());
 
@@ -167,17 +170,21 @@ public class ApiServiceTests {
         bitcoinStatusUpdateDTO.setStatus_updates(new ArrayList<>());
         when(mockCryptoClient.getStatusUpdates("bitcoin")).thenReturn(bitcoinStatusUpdateDTO);
 
-        List<Map<String, Object>> litecoinStatusUpdates = new ArrayList<>();
-        Map<String, Object> statusUpdateOne = new HashMap<>();
-        statusUpdateOne.put("user_title", USER_TITLE);
-        statusUpdateOne.put("description", DESCRIPTION_ONE);
-        statusUpdateOne.put("created_at", CREATED_DATE_ONE);
+        List<StatusUpdateDataDTO> litecoinStatusUpdates = new ArrayList<>();
+        StatusUpdateDataDTO statusUpdateOne = StatusUpdateDataDTO.builder()
+                .user_title(USER_TITLE)
+                .description(DESCRIPTION_ONE)
+                .created_at(CREATED_DATE_ONE)
+                .build();
+
         litecoinStatusUpdates.add(statusUpdateOne);
 
-        Map<String, Object> statusUpdateTwo = new HashMap<>();
-        statusUpdateTwo.put("user_title", USER_TITLE);
-        statusUpdateTwo.put("description", DESCRIPTION_TWO);
-        statusUpdateTwo.put("created_at", CREATED_DATE_TWO);
+        StatusUpdateDataDTO statusUpdateTwo = StatusUpdateDataDTO.builder()
+                .user_title(USER_TITLE)
+                .description(DESCRIPTION_TWO)
+                .created_at(CREATED_DATE_TWO)
+                .build();
+
         litecoinStatusUpdates.add(statusUpdateTwo);
 
         litecoinStatusUpdateDTO.setStatus_updates(litecoinStatusUpdates);
@@ -198,13 +205,13 @@ public class ApiServiceTests {
         assertEquals("$4066289130", paginatedCurrencyDataList.get(1).getMarketCap());
         assertEquals(2, paginatedCurrencyDataList.get(1).getStatusUpdates().size());
 
-        assertEquals(USER_TITLE, paginatedCurrencyDataList.get(1).getStatusUpdates().get(0).get("title"));
-        assertEquals(DESCRIPTION_ONE, paginatedCurrencyDataList.get(1).getStatusUpdates().get(0).get("description"));
-        assertEquals("21-05-2020", paginatedCurrencyDataList.get(1).getStatusUpdates().get(0).get("createdAt"));
+        assertEquals(USER_TITLE, paginatedCurrencyDataList.get(1).getStatusUpdates().get(0).getTitle());
+        assertEquals(DESCRIPTION_ONE, paginatedCurrencyDataList.get(1).getStatusUpdates().get(0).getDescription());
+        assertEquals("21-05-2020", paginatedCurrencyDataList.get(1).getStatusUpdates().get(0).getCreatedAt());
 
-        assertEquals(USER_TITLE, paginatedCurrencyDataList.get(1).getStatusUpdates().get(1).get("title"));
-        assertEquals(DESCRIPTION_TWO, paginatedCurrencyDataList.get(1).getStatusUpdates().get(1).get("description"));
-        assertEquals("02-03-2020", paginatedCurrencyDataList.get(1).getStatusUpdates().get(1).get("createdAt"));
+        assertEquals(USER_TITLE, paginatedCurrencyDataList.get(1).getStatusUpdates().get(1).getTitle());
+        assertEquals(DESCRIPTION_TWO, paginatedCurrencyDataList.get(1).getStatusUpdates().get(1).getDescription());
+        assertEquals("02-03-2020", paginatedCurrencyDataList.get(1).getStatusUpdates().get(1).getCreatedAt());
     }
 
     @Test
