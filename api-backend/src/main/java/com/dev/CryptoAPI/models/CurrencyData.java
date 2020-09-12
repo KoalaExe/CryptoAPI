@@ -17,9 +17,9 @@ public class CurrencyData {
     private String id;
     private String symbol;
     private String name;
-    private String marketCap;
     private String genesisDate;
     private String lastUpdate;
+    private MarketCap marketCap;
     private Map<String, String> currentPrices = new HashMap<>();
     private Map<String, String> pricePercentageChange = new HashMap<>();
     private Map<String, String> lastWeekPrice = new HashMap<>();
