@@ -38,7 +38,9 @@ public class ApiTests
             .body("id", equalTo("bitcoin"))
             .body("symbol", equalTo("btc"))
             .body("name", equalTo("Bitcoin"))
-            .body("marketCap", equalTo("225371848920"))
+            .body("marketCap.aud", equalTo("311607457076"))
+            .body("marketCap.usd", equalTo("225371848920"))
+            .body("marketCap.jpy", equalTo("23784618075810"))
             .body("genesisDate", equalTo("03-01-2009"))
             .body("lastUpdate", equalTo("18-08-2020"));
     }
