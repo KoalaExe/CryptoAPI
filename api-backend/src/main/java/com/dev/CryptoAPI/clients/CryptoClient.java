@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(value = "currencydata", url = "${external-api.test.url}")
+@FeignClient(value = "currencydata", url = "${external-api.url}")
 public interface CryptoClient {
 
     @GetMapping("/coins/{id}")

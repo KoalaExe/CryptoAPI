@@ -3,10 +3,7 @@ package com.dev.CryptoAPI.services;
 import com.dev.CryptoAPI.clients.CryptoClient;
 import com.dev.CryptoAPI.dto.*;
 import com.dev.CryptoAPI.exceptions.CurrencyNotFoundException;
-import com.dev.CryptoAPI.models.CurrencyData;
-import com.dev.CryptoAPI.models.MarketCap;
-import com.dev.CryptoAPI.models.PaginatedCurrencyData;
-import com.dev.CryptoAPI.models.StatusUpdate;
+import com.dev.CryptoAPI.models.*;
 import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,7 +55,10 @@ public class ApiService {
             Double currentPrice = currentData.getCurrent_price();
             Long marketCap = currentData.getMarket_cap();
 
-            PaginatedCurrencyData paginatedCurrencyData = new PaginatedCurrencyData(currencyId);
+            PaginatedCurrencyData paginatedCurrencyData = PaginatedCurrencyData.builder()
+                    .id(currencyId)
+                    .statusUpdates(new ArrayList<>())
+                    .build();
             paginatedCurrencyData.setCurrentPrice(currencySymbol + Double.toString(currentPrice));
             paginatedCurrencyData.setMarketCap(currencySymbol + Long.toString(marketCap));
 
@@ -110,11 +110,30 @@ public class ApiService {
             LocalDate lastUpdate = LocalDateTime.ofInstant(Instant.parse(currencyDataDTO.getLast_updated()), ZoneId.of(ZoneOffset.UTC.getId())).toLocalDate();
             currencyData.setLastUpdate(AUS_DATE_FORMATTER.format(lastUpdate));
 
-            for(String currentCurrency : requiredCurrencies) {
-                currencyData.getCurrentPrices().put(currentCurrency, Double.toString(currencyDataDTO.getMarket_data().getCurrent_price().getValue(currentCurrency).doubleValue()));
-                currencyData.getPricePercentageChange().put(currentCurrency, Double.toString(currencyDataDTO.getMarket_data().getPrice_change_percentage_24h_in_currency().getValue(currentCurrency).doubleValue()));
-                currencyData.getLastWeekPrice().put(currentCurrency, Double.toString(currencyHistoryDTO.getMarket_data().getCurrent_price().getValue(currentCurrency).doubleValue()));
-            }
+            CurrencyValues currentPrices = CurrencyValues.builder()
+                .aud(Double.toString(currencyDataDTO.getMarket_data().getCurrent_price().getAud().doubleValue()))
+                .usd(Double.toString(currencyDataDTO.getMarket_data().getCurrent_price().getUsd().doubleValue()))
+                .jpy(Double.toString(currencyDataDTO.getMarket_data().getCurrent_price().getJpy().doubleValue()))
+                .btc(Double.toString(currencyDataDTO.getMarket_data().getCurrent_price().getBtc().doubleValue()))
+                .build();
+
+            CurrencyValues priceChanges = CurrencyValues.builder()
+                .aud(Double.toString(currencyDataDTO.getMarket_data().getPrice_change_percentage_24h_in_currency().getAud().doubleValue()))
+                .usd(Double.toString(currencyDataDTO.getMarket_data().getPrice_change_percentage_24h_in_currency().getUsd().doubleValue()))
+                .jpy(Double.toString(currencyDataDTO.getMarket_data().getPrice_change_percentage_24h_in_currency().getJpy().doubleValue()))
+                .btc(Double.toString(currencyDataDTO.getMarket_data().getPrice_change_percentage_24h_in_currency().getBtc().doubleValue()))
+                .build();
+
+            CurrencyValues lastWeekPrices = CurrencyValues.builder()
+                .aud(Double.toString(currencyHistoryDTO.getMarket_data().getCurrent_price().getAud().doubleValue()))
+                .usd(Double.toString(currencyHistoryDTO.getMarket_data().getCurrent_price().getUsd().doubleValue()))
+                .jpy(Double.toString(currencyHistoryDTO.getMarket_data().getCurrent_price().getJpy().doubleValue()))
+                .btc(Double.toString(currencyHistoryDTO.getMarket_data().getCurrent_price().getBtc().doubleValue()))
+                .build();
+
+            currencyData.setCurrentPrices(currentPrices);
+            currencyData.setPricePercentageChange(priceChanges);
+            currencyData.setLastWeekPrice(lastWeekPrices);
         } catch(FeignException e) {
             throw new CurrencyNotFoundException(currencyId + " was not found!");
         }

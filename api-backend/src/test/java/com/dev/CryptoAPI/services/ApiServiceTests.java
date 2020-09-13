@@ -112,20 +112,20 @@ public class ApiServiceTests {
         assertEquals("03-01-2009", currencyData.getGenesisDate());
         assertEquals("02-09-2020", currencyData.getLastUpdate());
 
-        assertEquals("16175.85", currencyData.getCurrentPrices().get("aud"));
-        assertEquals("11898.14", currencyData.getCurrentPrices().get("usd"));
-        assertEquals("1261834.0", currencyData.getCurrentPrices().get("jpy"));
-        assertEquals("1.0", currencyData.getCurrentPrices().get("btc"));
+        assertEquals("16175.85", currencyData.getCurrentPrices().getAud());
+        assertEquals("11898.14", currencyData.getCurrentPrices().getUsd());
+        assertEquals("1261834.0", currencyData.getCurrentPrices().getJpy());
+        assertEquals("1.0", currencyData.getCurrentPrices().getBtc());
 
-        assertEquals("2.73808", currencyData.getPricePercentageChange().get("aud"));
-        assertEquals("2.40044", currencyData.getPricePercentageChange().get("usd"));
-        assertEquals("2.65895", currencyData.getPricePercentageChange().get("jpy"));
-        assertEquals("0.0", currencyData.getPricePercentageChange().get("btc"));
+        assertEquals("2.73808", currencyData.getPricePercentageChange().getAud());
+        assertEquals("2.40044", currencyData.getPricePercentageChange().getUsd());
+        assertEquals("2.65895", currencyData.getPricePercentageChange().getJpy());
+        assertEquals("0.0", currencyData.getPricePercentageChange().getBtc());
 
-        assertEquals("15757.388389597621", currencyData.getLastWeekPrice().get("aud"));
-        assertEquals("11350.753473213", currencyData.getLastWeekPrice().get("usd"));
-        assertEquals("1207339.9193085101", currencyData.getLastWeekPrice().get("jpy"));
-        assertEquals("1.0", currencyData.getLastWeekPrice().get("btc"));
+        assertEquals("15757.388389597621", currencyData.getLastWeekPrice().getAud());
+        assertEquals("11350.753473213", currencyData.getLastWeekPrice().getUsd());
+        assertEquals("1207339.9193085101", currencyData.getLastWeekPrice().getJpy());
+        assertEquals("1.0", currencyData.getLastWeekPrice().getBtc());
     }
 
     @Test
