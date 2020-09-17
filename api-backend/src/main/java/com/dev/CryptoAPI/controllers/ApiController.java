@@ -2,6 +2,7 @@ package com.dev.CryptoAPI.controllers;
 
 import com.dev.CryptoAPI.exceptions.CurrencyNotFoundException;
 import com.dev.CryptoAPI.models.CurrencyData;
+import com.dev.CryptoAPI.models.ErrorResponse;
 import com.dev.CryptoAPI.models.PaginatedCurrencyData;
 import com.dev.CryptoAPI.services.ApiService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 public class ApiController {
@@ -34,19 +33,21 @@ public class ApiController {
             CurrencyData currencyData = apiService.getCurrencyData(currencyId);
             response = new ResponseEntity<CurrencyData>(currencyData, HttpStatus.OK);
         } catch (CurrencyNotFoundException e) {
-            Map<String, String> errorMap = new HashMap<>();
-            errorMap.put("status", "404");
-            errorMap.put("message", e.getMessage());
+            ErrorResponse error = ErrorResponse.builder()
+                    .message(e.getMessage())
+                    .status(HttpStatus.NOT_FOUND.value())
+                    .build();
 
-            response = new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.NOT_FOUND);
+            response = new ResponseEntity<ErrorResponse>(error, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            Map<String, String> errorMap = new HashMap<>();
-            errorMap.put("status", "422");
+            ErrorResponse error = ErrorResponse.builder()
+                    .status(HttpStatus.UNPROCESSABLE_ENTITY.value())
+                    .build();
 
-            response = new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.UNPROCESSABLE_ENTITY);
+            response = new ResponseEntity<ErrorResponse>(error, HttpStatus.UNPROCESSABLE_ENTITY);
             if(e.getMessage() != null) {
-                errorMap.put("message", e.getMessage());
-                response = new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.UNPROCESSABLE_ENTITY);
+                error.setMessage(e.getMessage());
+                response = new ResponseEntity<ErrorResponse>(error, HttpStatus.UNPROCESSABLE_ENTITY);
             }
         }
 
@@ -61,17 +62,18 @@ public class ApiController {
             List<PaginatedCurrencyData> paginatedData = apiService.getPaginatedCurrencyDataList(currency, limit, page);
             response = new ResponseEntity<List<PaginatedCurrencyData>>(paginatedData, HttpStatus.OK);
         } catch(CurrencyNotFoundException e) {
-            Map<String, String> errorMap = new HashMap<>();
-            errorMap.put("status", "404");
-            errorMap.put("message", e.getMessage());
+            ErrorResponse error = ErrorResponse.builder()
+                    .status(HttpStatus.NOT_FOUND.value())
+                    .message(e.getMessage())
+                    .build();
 
-            response = new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.NOT_FOUND);
+            response = new ResponseEntity<ErrorResponse>(error, HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            Map<String, String> errorMap = new HashMap<>();
-            errorMap.put("status", "422");
-            e.printStackTrace();
+            ErrorResponse error = ErrorResponse.builder()
+                    .status(HttpStatus.UNPROCESSABLE_ENTITY.value())
+                    .build();
 
-            response = new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.UNPROCESSABLE_ENTITY);
+            response = new ResponseEntity<ErrorResponse>(error, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         return response;

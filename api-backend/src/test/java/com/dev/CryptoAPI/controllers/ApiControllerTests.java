@@ -2,6 +2,7 @@ package com.dev.CryptoAPI.controllers;
 
 import com.dev.CryptoAPI.exceptions.CurrencyNotFoundException;
 import com.dev.CryptoAPI.models.CurrencyData;
+import com.dev.CryptoAPI.models.ErrorResponse;
 import com.dev.CryptoAPI.models.PaginatedCurrencyData;
 import com.dev.CryptoAPI.services.ApiService;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,8 +61,8 @@ public class ApiControllerTests {
         ResponseEntity<?> response = apiController.getCoin(INVALID_CURRENCY);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("404", ((Map<String, String>) response.getBody()).get("status"));
-        assertEquals(INVALID_CURRENCY_EXCEPTION, ((Map<String, String>) response.getBody()).get("message"));
+        assertEquals("404", ((ErrorResponse) response.getBody()).getStatus());
+        assertEquals(INVALID_CURRENCY_EXCEPTION, ((ErrorResponse) response.getBody()).getMessage());
     }
 
     @Test
@@ -71,7 +72,7 @@ public class ApiControllerTests {
         ResponseEntity<?> response = apiController.getCoin(INVALID_CURRENCY);
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertEquals("422", ((Map<String, String>) response.getBody()).get("status"));
+        assertEquals("422", ((ErrorResponse) response.getBody()).getStatus());
     }
 
     @Test
@@ -81,8 +82,8 @@ public class ApiControllerTests {
         ResponseEntity<?> response = apiController.getCoin(INVALID_CURRENCY);
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertEquals("422", ((Map<String, String>) response.getBody()).get("status"));
-        assertEquals("Error", ((Map<String, String>) response.getBody()).get("message"));
+        assertEquals("422", ((ErrorResponse) response.getBody()).getStatus());
+        assertEquals("Error", ((ErrorResponse) response.getBody()).getMessage());
     }
 
     @Test
@@ -104,8 +105,8 @@ public class ApiControllerTests {
         ResponseEntity<?> response = apiController.getPaginatedCurrencyData("ABC", VALID_LIMIT, PAGE_NUMBER);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("404", ((Map<String, String>) response.getBody()).get("status"));
-        assertEquals(INVALID_CURRENCY_EXCEPTION, ((Map<String, String>) response.getBody()).get("message"));
+        assertEquals("404", ((ErrorResponse) response.getBody()).getStatus());
+        assertEquals(INVALID_CURRENCY_EXCEPTION, ((ErrorResponse) response.getBody()).getMessage());
     }
 
     @Test
@@ -115,6 +116,6 @@ public class ApiControllerTests {
         ResponseEntity<?> response = apiController.getPaginatedCurrencyData(anyString(), anyInt(), anyInt());
 
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        assertEquals("422", ((Map<String, String>) response.getBody()).get("status"));
+        assertEquals("422", ((ErrorResponse) response.getBody()).getStatus());
     }
 }
